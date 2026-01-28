@@ -1,69 +1,73 @@
 import { user } from "./form.js";
 
-
-const status = document.getElementById('status-bar');
-
-export async function sendAllEmails(){
+export async function sendAllEmails() {
+    // 1. Recupera os dados do SessionStorage e do Objeto User
     const userData = JSON.parse(sessionStorage.getItem('userData'));
+    
+    // Tratamento das respostas (Mantendo sua lógica original de formatação)
     const responses = JSON.stringify(user.answers);
     const responsesArray = responses.split(',');
     const formattedResponses = responsesArray.join('\n');
-    const cleanedFormattedResponses = formattedResponses.replace(/["[\]]/g, '');
+    const cleanedFormattedResponses = formattedResponses.replace(/["[\]]/g, '').replace(/,/g, '\n');
 
+    // 2. Cálculo do Tempo (Mantendo sua lógica original)
     const date = new Date();
-    const hours = date.getHours();
+    let hours = date.getHours();
     let minutes = date.getMinutes();
-    if(minutes.lenght == 1){
-        minutes = "0"+minutes
-    }
     let seconds = date.getSeconds();
-    if(seconds.lenght == 1){
-        seconds = "0"+seconds
+
+    // Pequena correção: .length funciona em strings, números não têm .length direto
+    const strMinutes = minutes < 10 ? "0" + minutes : minutes;
+    const strSeconds = seconds < 10 ? "0" + seconds : seconds;
+
+    const finalTime = `${hours}:${strMinutes}:${strSeconds}`;
+    
+    // Recupera o tempo inicial e limpa as aspas extras
+    let initTime = sessionStorage.getItem('initTime');
+    if (initTime) {
+        initTime = initTime.replace(/['"]+/g, '');
+    } else {
+        initTime = "--:--:--";
     }
 
-    const finalTime = `${hours}:${minutes}:${seconds}`;
-    const initTime = JSON.stringify(sessionStorage.getItem('initTime'));
+    const timeString = `${initTime} às ${finalTime}`;
 
-    const time = `${initTime} -- ${finalTime}`;
-
-    const formatedTime = time.replace(/\\"/g, '').replace(/"/g, '');
-    console.log(formatedTime);
-
+    // 3. Configuração do Envio para o FormSubmit
+    // DEFINA AQUI QUEM SERÁ O PRINCIPAL (Que recebe o link de ativação)
+    const emailPrincipal = "brunosantiago7002@gmail.com"; 
     
-    console.log("nome: "+userData.name);
-    console.log("responses: "+responses.toString())
-    console.log(`Time: ${formatedTime}`);
-    await sendEmailMicheli(cleanedFormattedResponses,formatedTime,userData);
-}
+    // DEFINA AQUI AS CÓPIAS (Separadas por vírgula)
+    const emailsCopias = "brunosantiago2007@gmail.com,rh@novaes.eng.br";
 
-async function sendEmailMicheli(cleanedFormattedResponses,formatedTime,userData) {
-   
-    const data = {
-        service_id: 'service_8qh06ng',
-        template_id: 'template_6qvjzwi',
-        user_id: 'LzfiSU8wYibsYiSsV',
-        template_params: {
-            'name': userData.name +" "+userData.lastname,
-            'response': cleanedFormattedResponses,
-            'time':formatedTime
-        }
-    };
+    // Criação do formulário virtual para envio
+    const formData = new FormData();
+    
+    // Campos Especiais do FormSubmit
+    formData.append("_cc", emailsCopias); // Envia para os outros emails
+    formData.append("_subject", `Novo Treinamento: ${userData.name} ${userData.lastname}`); // Assunto do email
+    formData.append("_template", "table"); // Formata o email como uma tabela bonita
+    formData.append("_captcha", "false"); // Desativa o captcha (opcional)
+    
+    // Se o usuário não preencheu email, usamos um genérico para não dar erro
+    formData.append("email", userData.email || "sem_email@novaes.eng.br"); 
+
+    // Dados do Formulário
+    formData.append("Nome do Colaborador", `${userData.name} ${userData.lastname}`);
+    formData.append("Horário de Realização", timeString);
+    formData.append("Respostas do Questionário", cleanedFormattedResponses);
 
     try {
-         const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-             method: 'POST',
-             body: JSON.stringify(data),
-             headers: {
-                 'Content-Type': 'application/json',
-                 'Accept': 'application/json'
-             }
-         });
-        console.log(JSON.stringify(data))
-        console.log("certo: "+JSON.stringify(res));
-    } catch (err) {
-        console.log("erro:  "+err.stack);
-        
-    }
-    
-}
+        // Envio via AJAX para não sair da página
+        const response = await fetch(`https://formsubmit.co/ajax/${emailPrincipal}`, {
+            method: "POST",
+            body: formData
+        });
 
+        const result = await response.json();
+        console.log("Sucesso ao enviar:", result);
+        
+    } catch (error) {
+        console.error("Erro ao enviar email:", error);
+        // Mesmo com erro no envio, o código segue para redirecionar o usuário na outra função
+    }
+}
