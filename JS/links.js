@@ -11,4 +11,4 @@ const   HomePage = "https://grupo-novaes.github.io/Trainings_Simple_Platform/ind
 //const   HomePage = "/index.html";
 
 
-export default { VideoPage, HomePage, FormsPage,  LoginPage, thankYouPage, AdminPage}
+export default { VideoPage, HomePage, FormsPage,  LoginPage, thankYouPage}
