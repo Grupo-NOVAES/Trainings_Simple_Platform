@@ -123,7 +123,7 @@ function prevQuestion() {
       cancelButtonText: "Não, continuar a responder",
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = "https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/videos.html"
+        window.location.href = links.VideoPage
       }
     });
   }
@@ -145,7 +145,6 @@ function goToFinal() {
       document.getElementById("nextBtn").disabled = true;
       document.getElementById("prevBtn").disabled = true;
       await sendAllEmails();
-      window.location.href = "https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/thanks.html"
     }
   });
 }
