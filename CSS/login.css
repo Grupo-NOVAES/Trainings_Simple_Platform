@@ -25,6 +25,10 @@ header {
     animation: fadeInDown 0.8s ease;
 }
 
+#header_email{
+    background: var(--primary-color);
+}
+
 #logo {
     max-width: 250px;
     height: auto;
@@ -109,6 +113,10 @@ header {
 .btn-primary {
     background-color: var(--primary-color);
     border: none;
+}
+
+#txtMainEmail{
+    color: var(--text-color);
 }
 
 .btn-primary:hover {

@@ -1,6 +1,7 @@
 import { user } from "./form.js";
 import { db } from "./firebase-config.js"; 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import links from "./links.js";
 
 export async function sendAllEmails() {
     // 1. Dados
@@ -88,7 +89,7 @@ async function sendEmailFormSubmit(targetEmail, data) {
             body: JSON.stringify(data)
         });
 
-        const result = await response.json();
+        const result = await response.json();   
         
         if(result.success === "false") {
             throw new Error("FormSubmit retornou erro.");
@@ -100,6 +101,10 @@ async function sendEmailFormSubmit(targetEmail, data) {
             icon: "success",
             confirmButtonColor: "#3085d6",
             confirmButtonText: "Fechar"
+        }).then(async (result) => {
+            if(result.isConfirmed) {
+                window.location.href = links.thankYouPage
+            }
         });
 
     } catch (err) {
