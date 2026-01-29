@@ -1,166 +1,250 @@
-/* Importando fonte Google (opcional, mas recomendado) */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-:root {
-    --primary-color: #007B8F; /* Azul Novaes */
-    --primary-hover: #002329;
-    --bg-gradient: #f3f3f3;
-    --card-bg: #ffffff;
-    --text-color: #333;
+@font-face {
+    font-family: fonteNexa;
+    src: url(../font/Nexa\ Bold.otf);
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg-gradient);
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: var(--text-color);
+    font-family: "Montserrat", sans-serif;
+    height: 100vh;
+}
+
+a {
+    text-decoration: none;
 }
 
 header {
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-    animation: fadeInDown 0.8s ease;
+    display: flex;
+    width: 100%;
+    height: 90px;
+    background-color: white;
 }
 
 #logo {
-    max-width: 250px;
-    height: auto;
-    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
-    transition: transform 0.3s ease;
+    margin-top: 20px;
+    margin-left: 50px;
+    width: 200px;
 }
 
-#logo:hover {
-    transform: scale(1.05);
-}
-
-/* Container Principal do Login */
-.login-wrapper {
-    background: var(--card-bg);
+main {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5%;
+    margin-right: 5%;
+    align-items: center;
     width: 100%;
-    max-width: 480px;
-    padding: 2.5rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 64, 128, 0.15);
-    animation: fadeInUp 0.8s ease;
-    margin-bottom: 2rem;
 }
 
-/* Título */
 #h1novaes {
-    color: var(--primary-color);
+    font-family: "Montserrat", sans-serif;
+    margin-top: 60px;
+    color: #007B8F;
     font-weight: 600;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 30pt;
 }
 
-/* Estilização das Abas (Pills) */
-.nav-pills {
-    background-color: #f0f2f5;
-    border-radius: 50px;
-    padding: 5px;
-    margin-bottom: 2rem !important;
+#form_main {
+    width: 450px;
+    padding-bottom: 40px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: linear-gradient(#b3dfe7, rgb(226, 226, 226), rgb(255, 255, 255));
+    margin-bottom: 30px;
+    margin-top: 10px;
 }
 
-.nav-pills .nav-link {
-    border-radius: 50px;
-    color: #666;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.nav-pills .nav-link.active {
-    background-color: var(--primary-color);
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(0, 64, 128, 0.3);
-}
-
-.nav-pills .nav-link:hover:not(.active) {
-    background-color: #e2e6ea;
-    color: var(--primary-color);
-}
-
-/* Inputs e Formulários */
-.form-floating > .form-control:focus,
-.form-floating > .form-control:not(:placeholder-shown) {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(0, 64, 128, 0.1);
-}
-
-.form-control {
-    border-radius: 10px;
-    border: 1px solid #ced4da;
-    background-color: #f8f9fa;
-}
-
-/* Botões */
-.btn-primary, .btn-dark, .btn-success {
-    border-radius: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 12px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 64, 128, 0.3);
-}
-
-/* Animações de Entrada */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.fade-in-form {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Estilo do Dashboard (Quando logado) */
-.painel {
-    background: white;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+.inputs {
     width: 100%;
-    max-width: 900px;
-    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
-.hidden {
-    display: none !important;
+#h1Entrar {
+    font-family: "Montserrat", sans-serif;
+    margin-top: 10px;
+    color: #007B8F;
+    margin-bottom: 30px;
+    justify-content: center;
+    align-items: center;
+    font-size: 20pt;
 }
 
-/* Responsividade */
-@media (max-width: 576px) {
-    .login-wrapper {
-        padding: 1.5rem;
-        margin: 1rem;
-        max-width: 100%;
-    }
-    
+label,
+button {
+    font-family: "Montserrat", sans-serif;
+    color: black;
+    display: block;
+}
+
+label {
+    justify-content: flex-start;
+    align-items: start;
+}
+
+#input_name {
+    width: 80%;
+}
+
+#input_lastname {
+    width: 80%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#input_email {
+    width: 80%;
+}
+
+#btn_login {
+    font-family: "Montserrat", sans-serif;
+    background-color: #007B8F;
+    color: rgb(255, 255, 255);
+    padding: 5px 30px;
+    border-radius: 5px;
+    border: none;
+    transition: 0.4s ease-in-out;
+    margin-top: 20px;
+}
+
+#btn_login:hover {
+    background-color: #083C52;
+    cursor: pointer;
+    transform: scale(105%);
+}
+
+@media screen and (max-width: 610px) {
     #logo {
-        max-width: 180px;
+        width: 180px;
+        margin-left: 30px;
+    }
+}
+
+@media screen and (max-width: 475px) {
+    #logo {
+        width: 160px;
+        margin-left: 12px;
+    }
+
+    #h1novaes {
+        margin-top: 48px;
+        font-weight: 600;
+        font-size: 25pt;
+    }
+
+    #h1Entrar {
+        font-size: 19pt;
+        margin-top: 10px;
+        margin-bottom: 25px;
+    }
+
+    #form_main {
+        width: 90%;
+        border-radius: 20px;
+        padding-top: 15px;
+    }
+
+    #input_name {
+        font-size: 11pt;
+    }
+
+    #input_lastname {
+        font-size: 11pt;
+    }
+
+    #input_email {
+        font-size: 11pt;
+    }
+}
+
+@media screen and (max-width: 370px) {
+    #logo {
+        width: 130px;
+        margin-left: 10px;
+    }
+
+    #h1novaes {
+        margin-top: 42px;
+        font-weight: 600;
+        font-size: 20pt;
+        margin-left: 10px;
+        margin-right: 10px;
+
+    }
+
+    #h1Entrar {
+        font-size: 15pt;
+        margin-top: 8px;
+        margin-bottom: 20px;
+    }
+
+    #form_main {
+        width: 90%;
+        padding-top: 15px;
+        border-radius: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    #input_name {
+        font-size: 10pt;
+    }
+
+    #input_lastname {
+        font-size: 10pt;
+    }
+
+    #input_email {
+        font-size: 10pt;
+    }
+
+}
+
+@media screen and (max-width: 300px) {
+    #logo {
+        width: 110px;
+        margin-left: 10px;
+    }
+
+    #h1novaes {
+        margin-top: 30px;
+        font-weight: 600;
+        font-size: 18pt;
+    }
+
+    #h1Entrar {
+        font-size: 14pt;
+        margin-top: 8px;
+        margin-bottom: 20px;
+    }
+
+    #form_main {
+        width: 90%;
+        padding-top: 15px;
+        border-radius: 20px;
+    }
+    #input_name {
+        font-size: 10pt;
+    }
+
+    #input_lastname {
+        font-size: 10pt;
+    }
+
+    #input_email {
+        font-size: 10pt;
+    }
+    #btn_login{
+        font-size: 10.5pt;
     }
 }

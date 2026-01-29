@@ -1,125 +1,73 @@
 import { user } from "./form.js";
-import { db } from "./firebase-config.js"; 
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import links from "./links.js";
-
-const status = document.getElementById('status-bar');
 
 export async function sendAllEmails() {
-    // 1. Coleta e formata os dados do usuário e respostas
+    // 1. Recupera os dados do SessionStorage e do Objeto User
     const userData = JSON.parse(sessionStorage.getItem('userData'));
     
-    // Tratamento das respostas para formato legível
+    // Tratamento das respostas (Mantendo sua lógica original de formatação)
     const responses = JSON.stringify(user.answers);
     const responsesArray = responses.split(',');
-    const formattedResponses = responsesArray.join('\n').replace(/["[\]]/g, '');
+    const formattedResponses = responsesArray.join('\n');
+    const cleanedFormattedResponses = formattedResponses.replace(/["[\]]/g, '').replace(/,/g, '\n');
 
-    // Cálculo do tempo
+    // 2. Cálculo do Tempo (Mantendo sua lógica original)
     const date = new Date();
-    const finalTime = `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-    // Limpeza extra para evitar caracteres de escape no JSON antigo
-    const initTimeRaw = sessionStorage.getItem('initTime');
-    const initTime = initTimeRaw ? JSON.stringify(initTimeRaw).replace(/\\"/g, '').replace(/"/g, '') : "N/A";
-    const time = `${initTime} -- ${finalTime}`;
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
 
-    // 2. Busca emails no Firebase (Configuração)
-    let emailsDestino = ["inovacaonovaes@gmail.com"]; // Fallback de segurança
-    let emailPrincipal = "inovacaonovaes@gmail.com";
-    let emailsCopia = "";
+    // Pequena correção: .length funciona em strings, números não têm .length direto
+    const strMinutes = minutes < 10 ? "0" + minutes : minutes;
+    const strSeconds = seconds < 10 ? "0" + seconds : seconds;
 
-    try {
-        const docRef = doc(db, "settings", "general");
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.notificationEmails && data.notificationEmails.length > 0) {
-                emailsDestino = data.notificationEmails;
-                emailPrincipal = emailsDestino[0];
-                emailsCopia = emailsDestino.slice(1).join(',');
-            }
-        }
-
-        console.log("emailPrincipal: "+emailPrincipal)
-        console.log("emailsDestino: "+emailsDestino)
-        console.log("emailsCopia: "+emailsCopia)
-    } catch (error) {
-        console.error("Erro ao buscar emails no banco (usando padrão):", error);
-    }
-
-    // 3. Prepara os dados para o FormSubmit
-    const nomeCompleto = `${userData.name} ${userData.lastname}`;
+    const finalTime = `${hours}:${strMinutes}:${strSeconds}`;
     
-    const formData = {
-        _subject: `Treinamento Concluído: ${nomeCompleto}`,
-        _template: "table", // Cria uma tabela formatada automaticamente
-        _captcha: "false",  // Desativa captcha para envio via JS
-        
-        // Campos que aparecerão no email:
-        "Nome do Colaborador": nomeCompleto,
-        "Tempo de Prova": time,
-        "Respostas": formattedResponses
-    };
-
-    // Adiciona cópia (CC) apenas se houver mais de um email configurado
-    if (emailsCopia) {
-        formData["_cc"] = emailsCopia;
+    // Recupera o tempo inicial e limpa as aspas extras
+    let initTime = sessionStorage.getItem('initTime');
+    if (initTime) {
+        initTime = initTime.replace(/['"]+/g, '');
+    } else {
+        initTime = "--:--:--";
     }
 
-    console.log(`Enviando para: ${emailPrincipal} (CC: ${emailsCopia})`);
+    const timeString = `${initTime} às ${finalTime}`;
 
-    // Feedback visual de "Enviando..."
-    Swal.fire({
-        title: 'Enviando resultados...',
-        text: 'Por favor, aguarde.',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
+    // 3. Configuração do Envio para o FormSubmit
+    // DEFINA AQUI QUEM SERÁ O PRINCIPAL (Que recebe o link de ativação)
+    const emailPrincipal = "brunosantiago7002@gmail.com"; 
+    
+    // DEFINA AQUI AS CÓPIAS (Separadas por vírgula)
+    const emailsCopias = "brunosantiago2007@gmail.com,rh@novaes.eng.br";
 
-    await sendEmailFormSubmit(emailPrincipal, formData);
-}
+    // Criação do formulário virtual para envio
+    const formData = new FormData();
+    
+    // Campos Especiais do FormSubmit
+    formData.append("_cc", emailsCopias); // Envia para os outros emails
+    formData.append("_subject", `Novo Treinamento: ${userData.name} ${userData.lastname}`); // Assunto do email
+    formData.append("_template", "table"); // Formata o email como uma tabela bonita
+    formData.append("_captcha", "false"); // Desativa o captcha (opcional)
+    
+    // Se o usuário não preencheu email, usamos um genérico para não dar erro
+    formData.append("email", userData.email || "sem_email@novaes.eng.br"); 
 
-async function sendEmailFormSubmit(targetEmail, data) {
+    // Dados do Formulário
+    formData.append("Nome do Colaborador", `${userData.name} ${userData.lastname}`);
+    formData.append("Horário de Realização", timeString);
+    formData.append("Respostas do Questionário", cleanedFormattedResponses);
+
     try {
-        const response = await fetch(`https://formsubmit.co/ajax/${targetEmail}`, {
+        // Envio via AJAX para não sair da página
+        const response = await fetch(`https://formsubmit.co/ajax/${emailPrincipal}`, {
             method: "POST",
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
+            body: formData
         });
 
         const result = await response.json();
-        console.log("Sucesso FormSubmit:", result);
+        console.log("Sucesso ao enviar:", result);
         
-        if(result.success === "false") {
-            throw new Error("FormSubmit retornou erro no envio.");
-        }
-
-        // --- SUCESSO ---
-        Swal.fire({
-            title: "Sucesso!",
-            text: "Seu treinamento foi enviado e registrado com sucesso.",
-            icon: "success",
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: "Fechar"
-        }).then(() => {
-            // Opcional: Redirecionar para o início ou limpar a sessão
-            sessionStorage.clear();
-            window.location.href = links.thankYouPage;
-        });
-
-    } catch (err) {
-        console.error("Erro no envio:", err);
-        
-        // --- ERRO ---
-        Swal.fire({
-            title: "Atenção",
-            text: "Houve um erro ao enviar seus resultados. Por favor, tire um print desta tela e avise o instrutor.",
-            icon: "error"
-        });
+    } catch (error) {
+        console.error("Erro ao enviar email:", error);
+        // Mesmo com erro no envio, o código segue para redirecionar o usuário na outra função
     }
 }
