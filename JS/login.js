@@ -36,9 +36,8 @@ async function handleStudentLogin() {
     return;
   }
 
-  // Salva dados e redireciona para vídeos
   sessionStorage.setItem("userData", JSON.stringify(user));
-  window.location.href = links.VideoPage; // Redireciona para videos.html
+  window.location.href = links.VideoPage; 
 }
 
 btnStartTraining.addEventListener("click", handleStudentLogin);
@@ -47,24 +46,19 @@ btnStartTraining.addEventListener("click", handleStudentLogin);
 // 2. LÓGICA DO ADMINISTRADOR (FIREBASE)
 // ============================================================
 
-// Monitora o estado da autenticação (Se logou, esconde login e mostra painel)
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Usuário é Admin e está logado
-        loginScreen.style.display = 'none'; // Esconde formulários
-        dashboardContainer.style.display = 'block'; // Mostra painel
+        loginScreen.style.display = 'none'; 
+        dashboardContainer.style.display = 'block'; 
         
-        // Carrega dados do banco
         carregarConfiguracoes(); 
         carregarVideos(); 
     } else {
-        // Ninguém logado (estado inicial)
         loginScreen.style.display = 'block';
         dashboardContainer.style.display = 'none';
     }
 });
 
-// Botão de Login Admin
 btnAdminLogin.addEventListener('click', async () => {
     const email = document.getElementById('adminEmail').value;
     const pass = document.getElementById('adminPass').value;
@@ -76,7 +70,6 @@ btnAdminLogin.addEventListener('click', async () => {
 
     try {
         await signInWithEmailAndPassword(auth, email, pass);
-        // O onAuthStateChanged vai cuidar de mudar a tela
     } catch (error) {
         console.error(error);
         Swal.fire({
@@ -87,10 +80,8 @@ btnAdminLogin.addEventListener('click', async () => {
     }
 });
 
-// Botão de Logout
 btnLogout.addEventListener('click', () => {
     signOut(auth);
-    // Recarrega a página para limpar estados visuais
     window.location.reload();
 });
 
@@ -101,6 +92,9 @@ btnLogout.addEventListener('click', () => {
 
 const configRef = doc(db, "settings", "general");
 
+// Variáveis globais para armazenar estado atual
+let currentMainMail = "";
+
 // --- CONFIGURAÇÕES E EMAILS ---
 async function carregarConfiguracoes() {
     try {
@@ -108,9 +102,12 @@ async function carregarConfiguracoes() {
         if (docSnap.exists()) {
             const data = docSnap.data();
             document.getElementById('checkObrigatorio').checked = data.videosMandatory;
-            renderEmails(data.notificationEmails || []);
+            
+            // Passamos os dois campos separadamente
+            currentMainMail = data.main_mail || "";
+            renderEmails(currentMainMail, data.notificationEmails || []);
         } else {
-            await setDoc(configRef, { videosMandatory: true, notificationEmails: [] });
+            await setDoc(configRef, { videosMandatory: true, notificationEmails: [], main_mail: "" });
         }
     } catch (e) { console.error("Erro config:", e); }
 }
@@ -122,11 +119,46 @@ document.getElementById('btnSalvarConfig').addEventListener('click', async () =>
 });
 
 // --- GERENCIAMENTO DE EMAILS ---
+const containerPrincipal = document.getElementById('containerEmailPrincipal');
 const listaEmails = document.getElementById('listaEmails');
 
-function renderEmails(emails) {
+function renderEmails(mainMail, secondaryEmails) {
+    // 1. Renderiza Email Principal
+    containerPrincipal.innerHTML = '';
+    
+    if (mainMail) {
+        containerPrincipal.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <span class="fw-bold text-dark">${mainMail}</span>
+                <button class="btn btn-sm btn-outline-danger" id="btnRemovePrincipal">
+                    Remover
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('btnRemovePrincipal').addEventListener('click', async () => {
+            Swal.fire({
+                title: "Remover Principal?",
+                text: "O sistema ficará sem remetente principal até você adicionar outro.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Sim, remover"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Define como vazio no banco
+                    await updateDoc(configRef, { main_mail: "" });
+                    carregarConfiguracoes();
+                }
+            });
+        });
+    } else {
+        containerPrincipal.innerHTML = '<span class="text-muted fst-italic">Nenhum email principal definido. O próximo email adicionado assumirá esta posição.</span>';
+    }
+
+    // 2. Renderiza Lista de Cópias
     listaEmails.innerHTML = '';
-    emails.forEach(email => {
+    secondaryEmails.forEach(email => {
         const li = document.createElement('li');
         li.className = "list-group-item d-flex justify-content-between align-items-center";
         li.textContent = email;
@@ -135,7 +167,7 @@ function renderEmails(emails) {
         btn.className = "btn btn-sm btn-danger";
         btn.textContent = "Remover";
         btn.onclick = async () => {
-            if(confirm(`Remover ${email}?`)) {
+            if(confirm(`Remover cópia para ${email}?`)) {
                 await updateDoc(configRef, { notificationEmails: arrayRemove(email) });
                 carregarConfiguracoes();
             }
@@ -147,10 +179,34 @@ function renderEmails(emails) {
 
 document.getElementById('btnAddEmail').addEventListener('click', async () => {
     const email = document.getElementById('novoEmail').value;
-    if(email) {
-        await updateDoc(configRef, { notificationEmails: arrayUnion(email) });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if(!email || !emailRegex.test(email)) {
+        Swal.fire("Inválido", "Insira um email válido.", "error");
+        return;
+    }
+
+    try {
+        // LÓGICA INTELIGENTE:
+        // Se não tem principal, vira principal. Se tem, vira cópia.
+        if (!currentMainMail) {
+            await updateDoc(configRef, { main_mail: email });
+            Swal.fire("Principal Definido", "Não esqueça de ativar no FormSubmit!", "success");
+        } else {
+            // Verifica se não está duplicando o principal na lista de cópia
+            if (email === currentMainMail) {
+                Swal.fire("Erro", "Este email já é o principal.", "warning");
+                return;
+            }
+            await updateDoc(configRef, { notificationEmails: arrayUnion(email) });
+            Swal.fire("Cópia Adicionada", "Email adicionado à lista de notificação.", "success");
+        }
+
         document.getElementById('novoEmail').value = "";
         carregarConfiguracoes();
+    } catch (error) {
+        console.error(error);
+        Swal.fire("Erro", "Falha ao salvar no banco.", "error");
     }
 });
 
@@ -179,7 +235,7 @@ async function carregarVideos() {
             
             li.querySelector('.btn-remover-video').addEventListener('click', async () => {
                 if(confirm("Excluir este vídeo?")) {
-                    await deleteDoc(doc.ref); // doc.ref é a referência direta
+                    await deleteDoc(doc.ref); 
                     carregarVideos();
                 }
             });

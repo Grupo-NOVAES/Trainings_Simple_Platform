@@ -123,13 +123,35 @@
                 </div>
 
                 <div class="tab-pane fade" id="emails">
+                    <!-- ÁREA DO EMAIL PRINCIPAL (DESTACADA) -->
+                    <div class="card p-3 mb-4 border-primary shadow-sm" style="background-color: #f0f8ff;">
+                        <h6 class="text-primary fw-bold mb-2">
+                            📧 Email Principal (Remetente)
+                        </h6>
+                        <p class="small text-muted mb-2">
+                            Este é o email que precisa ser ativado no FormSubmit. Se você removê-lo, o próximo email assumirá o lugar e precisará de nova ativação.
+                        </p>
+                        
+                        <!-- O JS vai preencher aqui -->
+                        <div id="containerEmailPrincipal" class="d-flex align-items-center justify-content-between p-2 bg-white border rounded">
+                            <span class="text-muted fst-italic">Nenhum email configurado</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- ÁREA DOS EMAILS EM CÓPIA -->
                     <div class="card p-3 border-0 shadow-sm bg-light">
-                        <h6 class="mb-3 text-primary">Destinatários dos Resultados</h6>
+                        <h6 class="mb-3 text-secondary">Emails em Cópia (CC)</h6>
+                        
                         <div class="input-group mb-3">
                             <input type="email" id="novoEmail" class="form-control" placeholder="novo@email.com">
-                            <button class="btn btn-primary" id="btnAddEmail">Adicionar</button>
+                            <button class="btn btn-primary" id="btnAddEmail">Adicionar Cópia</button>
                         </div>
-                        <ul id="listaEmails" class="list-group"></ul>
+
+                        <ul id="listaEmails" class="list-group">
+                            <!-- O JS vai preencher os emails secundários aqui -->
+                        </ul>
                     </div>
                 </div>
             </div>

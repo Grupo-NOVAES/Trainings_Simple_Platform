@@ -1,30 +1,25 @@
 import { user } from "./form.js";
 import { db } from "./firebase-config.js"; 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import links from "./links.js";
-
-const status = document.getElementById('status-bar');
 
 export async function sendAllEmails() {
-    // 1. Coleta e formata os dados do usuário e respostas
+    // 1. Dados
     const userData = JSON.parse(sessionStorage.getItem('userData'));
     
-    // Tratamento das respostas para formato legível
+    // Tratamento de Respostas
     const responses = JSON.stringify(user.answers);
     const responsesArray = responses.split(',');
     const formattedResponses = responsesArray.join('\n').replace(/["[\]]/g, '');
 
-    // Cálculo do tempo
+    // Tratamento de Tempo
     const date = new Date();
     const finalTime = `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
-    // Limpeza extra para evitar caracteres de escape no JSON antigo
     const initTimeRaw = sessionStorage.getItem('initTime');
     const initTime = initTimeRaw ? JSON.stringify(initTimeRaw).replace(/\\"/g, '').replace(/"/g, '') : "N/A";
     const time = `${initTime} -- ${finalTime}`;
 
-    // 2. Busca emails no Firebase (Configuração)
-    let emailsDestino = ["inovacaonovaes@gmail.com"]; // Fallback de segurança
-    let emailPrincipal = "inovacaonovaes@gmail.com";
+    // 2. BUSCA INTELIGENTE DE EMAILS (Atualizado para main_mail)
+    let emailPrincipal = "adm@novaes.eng.br"; // Fallback
     let emailsCopia = "";
 
     try {
@@ -33,49 +28,50 @@ export async function sendAllEmails() {
 
         if (docSnap.exists()) {
             const data = docSnap.data();
+            
+            // Prioridade: Campo main_mail
+            if (data.main_mail) {
+                emailPrincipal = data.main_mail;
+            } else if (data.notificationEmails && data.notificationEmails.length > 0) {
+                // Fallback antigo: Pega o primeiro da lista se não tiver main_mail
+                emailPrincipal = data.notificationEmails[0];
+            }
+
+            // Monta lista de cópia (CC)
             if (data.notificationEmails && data.notificationEmails.length > 0) {
-                emailsDestino = data.notificationEmails;
-                emailPrincipal = emailsDestino[0];
-                emailsCopia = emailsDestino.slice(1).join(',');
+                // Remove o principal da lista de cópia para não enviar duplicado
+                const listaFiltrada = data.notificationEmails.filter(e => e !== emailPrincipal);
+                emailsCopia = listaFiltrada.join(',');
             }
         }
-
-        console.log("emailPrincipal: "+emailPrincipal)
-        console.log("emailsDestino: "+emailsDestino)
-        console.log("emailsCopia: "+emailsCopia)
     } catch (error) {
         console.error("Erro ao buscar emails no banco (usando padrão):", error);
     }
 
-    // 3. Prepara os dados para o FormSubmit
+    // 3. Envio
     const nomeCompleto = `${userData.name} ${userData.lastname}`;
     
     const formData = {
         _subject: `Treinamento Concluído: ${nomeCompleto}`,
-        _template: "table", // Cria uma tabela formatada automaticamente
-        _captcha: "false",  // Desativa captcha para envio via JS
-        
-        // Campos que aparecerão no email:
+        _template: "table",
+        _captcha: "false",
         "Nome do Colaborador": nomeCompleto,
         "Tempo de Prova": time,
         "Respostas": formattedResponses
     };
 
-    // Adiciona cópia (CC) apenas se houver mais de um email configurado
     if (emailsCopia) {
         formData["_cc"] = emailsCopia;
     }
 
-    console.log(`Enviando para: ${emailPrincipal} (CC: ${emailsCopia})`);
+    console.log(`Enviando para Principal: ${emailPrincipal} | CC: ${emailsCopia}`);
 
-    // Feedback visual de "Enviando..."
+    // Feedback Visual
     Swal.fire({
         title: 'Enviando resultados...',
-        text: 'Por favor, aguarde.',
+        text: 'Por favor, aguarde um momento.',
         allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+        didOpen: () => { Swal.showLoading(); }
     });
 
     await sendEmailFormSubmit(emailPrincipal, formData);
@@ -93,32 +89,24 @@ async function sendEmailFormSubmit(targetEmail, data) {
         });
 
         const result = await response.json();
-        console.log("Sucesso FormSubmit:", result);
         
         if(result.success === "false") {
-            throw new Error("FormSubmit retornou erro no envio.");
+            throw new Error("FormSubmit retornou erro.");
         }
 
-        // --- SUCESSO ---
         Swal.fire({
             title: "Sucesso!",
-            text: "Seu treinamento foi enviado e registrado com sucesso.",
+            text: "Treinamento finalizado e enviado com sucesso.",
             icon: "success",
             confirmButtonColor: "#3085d6",
             confirmButtonText: "Fechar"
-        }).then(() => {
-            // Opcional: Redirecionar para o início ou limpar a sessão
-            sessionStorage.clear();
-            window.location.href = links.thankYouPage;
         });
 
     } catch (err) {
         console.error("Erro no envio:", err);
-        
-        // --- ERRO ---
         Swal.fire({
             title: "Atenção",
-            text: "Houve um erro ao enviar seus resultados. Por favor, tire um print desta tela e avise o instrutor.",
+            text: "Erro ao enviar resultados. Avise o instrutor.",
             icon: "error"
         });
     }
