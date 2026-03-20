@@ -1,1 +1,9 @@
-/js/links.js
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+node_modules/
+npm-debug.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
