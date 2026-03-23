@@ -25,7 +25,7 @@ async function goToForms() {
   if (response) {
     sessionStorage.setItem("userData", JSON.stringify(user));
     console.log(sessionStorage);
-    window.location.href="https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/videos.html";
+    window.location.href=links.FormsPage;
   } else {
     Swal.fire({
       title: "Nome ou sobrenome vazios!",
