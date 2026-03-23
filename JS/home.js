@@ -16,7 +16,7 @@ const btn_goToLogin = document.getElementById('btn_entrar')
 
 function goToLogin(){
     saveTime();
-    window.location.href= links.LoginPage;
+    window.location.href= "https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/login.html";
 }
 
 btn_goToLogin.addEventListener('click',goToLogin)

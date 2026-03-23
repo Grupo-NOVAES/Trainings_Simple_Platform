@@ -123,7 +123,7 @@ function prevQuestion() {
       cancelButtonText: "Não, continuar a responder",
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = links.LoginPage
+        window.location.href = "https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/videos.html"
       }
     });
   }
@@ -145,7 +145,7 @@ function goToFinal() {
       document.getElementById("nextBtn").disabled = true;
       document.getElementById("prevBtn").disabled = true;
       await sendAllEmails();
-      window.location.href = links.thankYouPage
+      window.location.href = "https://grupo-novaes.github.io/Trainings_Simple_Platform/HTML/thanks.html"
     }
   });
 }
@@ -166,7 +166,7 @@ function startTimer() {
         text: "Você será redirecionado para o início.",
         icon: "error",
       });
-      window.location.href = links.HomePage
+      window.location.href = "https://grupo-novaes.github.io/Trainings_Simple_Platform/index.html";
     }
 
     timeLeft--;
