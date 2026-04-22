@@ -40,7 +40,7 @@ export async function sendAllEmails(){
 async function sendEmailMicheli(cleanedFormattedResponses,formatedTime,userData) {
    
     const data = {
-        service_id: 'service_4zl297j',
+        service_id: 'service_1gnluge',
         template_id: 'template_or157qs',
         user_id: 'JtivqtQJgzgbbFPR8',
         template_params: {
