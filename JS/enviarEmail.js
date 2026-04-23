@@ -41,7 +41,7 @@ async function sendEmailMicheli(cleanedFormattedResponses,formatedTime,userData)
    
     const data = {
         service_id: 'service_azefr78',
-        template_id: 'template_or157qs',
+        template_id: 'template_6qvjzwi',
         user_id: 'LzfiSU8wYibsYiSsV',
         template_params: {
             'name': userData.name +" "+userData.lastname,
