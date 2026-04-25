@@ -40,9 +40,9 @@ export async function sendAllEmails(){
 async function sendEmailMicheli(cleanedFormattedResponses,formatedTime,userData) {
    
     const data = {
-        service_id: 'service_azefr78',
-        template_id: 'template_6qvjzwi',
-        user_id: 'LzfiSU8wYibsYiSsV',
+        service_id: 'service_6i9tfh8',
+        template_id: 'template_s9w5klc',
+        user_id: '8k32s_hNgP5thvaXe',
         template_params: {
             'name': userData.name +" "+userData.lastname,
             'response': cleanedFormattedResponses,
